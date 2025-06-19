@@ -41,12 +41,18 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Output text -->
-            <Label
-                Text="{Binding SelectedItemDetail}"
-                FontSize="18"
-                HorizontalOptions="CenterAndExpand"
-                VerticalOptions="Center" />
+            <!-- Output collection view -->
+            <CollectionView
+                x:Name="ItemsCollectionView"
+                ItemsSource="{Binding Items}"
+                SelectionMode="Single"
+                SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding}" FontSize="18" Padding="10"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
         </Grid>
     </Grid>
 </ContentPage>

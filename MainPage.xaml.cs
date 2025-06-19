@@ -22,12 +22,27 @@ namespace MauiApp2
             }
         }
 
+        public ObservableCollection<string> Items { get; set; } = new();
+        private string selectedItem;
+        public string SelectedItem
+        {
+            get => selectedItem;
+            set
+            {
+                if (selectedItem != value)
+                {
+                    selectedItem = value;
+                    OnPropertyChanged(nameof(SelectedItem));
+                }
+            }
+        }
+
         private const string DbPath = "items.db";
         private const string TableName = "Items";
 
         public MainPage()
         {
-            Batteries.Init(); // Use Batteries_V2.Init() instead of Batteries.Init()
+            SQLitePCL.Batteries.Init();
             InitializeComponent();
             BindingContext = this;
             InitializeDatabase();
@@ -46,17 +61,16 @@ namespace MauiApp2
 
         private void LoadItems()
         {
+            Items.Clear();
             using var connection = new SqliteConnection($"Data Source={DbPath}");
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = $"SELECT Detail FROM {TableName};";
             using var reader = command.ExecuteReader();
-            var details = new List<string>();
             while (reader.Read())
             {
-                details.Add(reader.GetString(0));
+                Items.Add(reader.GetString(0));
             }
-            SelectedItemDetail = string.Join("\n", details);
         }
 
         private void OnAddButtonClicked(object sender, EventArgs e)
@@ -76,12 +90,34 @@ namespace MauiApp2
 
         private void OnRemoveButtonClicked(object sender, EventArgs e)
         {
-            // Add your logic here
+            if (!string.IsNullOrEmpty(SelectedItem))
+            {
+                using var connection = new SqliteConnection($"Data Source={DbPath}");
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"DELETE FROM {TableName} WHERE Detail = @detail;";
+                command.Parameters.AddWithValue("@detail", SelectedItem);
+                command.ExecuteNonQuery();
+                LoadItems();
+                SelectedItem = null;
+            }
         }
 
         private void OnEditButtonClicked(object sender, EventArgs e)
         {
-            // Add your logic here
+            if (!string.IsNullOrEmpty(SelectedItem) && !string.IsNullOrWhiteSpace(ItemEditor.Text))
+            {
+                using var connection = new SqliteConnection($"Data Source={DbPath}");
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"UPDATE {TableName} SET Detail = @newDetail WHERE Detail = @oldDetail;";
+                command.Parameters.AddWithValue("@newDetail", ItemEditor.Text);
+                command.Parameters.AddWithValue("@oldDetail", SelectedItem);
+                command.ExecuteNonQuery();
+                LoadItems();
+                SelectedItem = null;
+                ItemEditor.Text = string.Empty;
+            }
         }
     }
 }
