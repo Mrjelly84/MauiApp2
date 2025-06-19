@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MauiApp2.MainPage">
+             x:Class="MauiApp2.MainPage"
+             Title="Inventory App">
 
     <Grid ColumnSpacing="0" RowSpacing="0">
         <Grid.ColumnDefinitions>
@@ -9,8 +10,8 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" /> <!-- Editor and buttons -->
+            <RowDefinition Height="*" />    <!-- Output box fills remaining space -->
         </Grid.RowDefinitions>
 
         <!-- Editor at the center -->
@@ -23,7 +24,7 @@
                 VerticalOptions="StartAndExpand" />
 
         <!-- Buttons stacked to the right -->
-        <StackLayout Orientation="Vertical" Grid.Column="1" Grid.Row="0">
+        <StackLayout Orientation="Vertical" Grid.Column="1" Grid.Row="0" Spacing="8">
             <Button Text="Add"
                     Clicked="OnAddButtonClicked" />
             <Button Text="Remove"
@@ -41,18 +42,33 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Output collection view -->
-            <CollectionView
-                x:Name="ItemsCollectionView"
-                ItemsSource="{Binding Items}"
-                SelectionMode="Single"
-                SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Label Text="{Binding}" FontSize="18" Padding="10"/>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+            <Frame BackgroundColor="Blue" Padding="0" HasShadow="True" CornerRadius="0">
+                <CollectionView
+                    x:Name="ItemsCollectionView"
+                    ItemsSource="{Binding Items}"
+                    SelectionMode="Single"
+                    SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                    ItemsLayout="VerticalList"
+                    VerticalScrollBarVisibility="Always">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="0">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal"/>
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="LightSkyBlue"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Label Text="{Binding}" FontSize="18" Padding="10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Frame>
         </Grid>
     </Grid>
 </ContentPage>
