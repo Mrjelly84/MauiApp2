@@ -40,11 +40,25 @@ namespace MauiApp2
         private const string DbPath = "items.db";
         private const string TableName = "Items";
 
+        private Entry usernameEntry;
+        private Entry passwordEntry;
+        private Grid mainGrid;  // Rename the field to avoid ambiguity
+        private Grid loginGrid; // Rename the field to avoid ambiguity
+
         public MainPage()
         {
             SQLitePCL.Batteries.Init();
             InitializeComponent();
             BindingContext = this;
+
+            // Initialize usernameEntry and passwordEntry
+            usernameEntry = this.FindByName<Entry>("UsernameEntry");
+            passwordEntry = this.FindByName<Entry>("PasswordEntry");
+
+            // Initialize MainGrid and LoginGrid
+            mainGrid = this.FindByName<Grid>("MainGrid"); // Use the renamed field
+            loginGrid = this.FindByName<Grid>("LoginGrid"); // Use the renamed field
+
             InitializeDatabase();
             LoadItems();
         }
@@ -118,6 +132,30 @@ namespace MauiApp2
                 SelectedItem = null;
                 ItemEditor.Text = string.Empty;
             }
+        }
+
+        private void OnLoginClicked(object sender, EventArgs e)
+        {
+            // Example: Hardcoded credentials
+            const string validUsername = "admin";
+            const string validPassword = "password123";
+
+            if (usernameEntry.Text == validUsername && passwordEntry.Text == validPassword)
+            {
+                loginGrid.IsVisible = false;
+                mainGrid.IsVisible = true;
+            }
+            else
+            {
+                DisplayAlert("Error", "Invalid username or password.", "OK");
+            }
+        }
+
+        private void OnLogoutClicked(object sender, EventArgs e)
+        {
+            // Logic to handle logout
+            loginGrid.IsVisible = true;
+            mainGrid.IsVisible = false;
         }
     }
 }

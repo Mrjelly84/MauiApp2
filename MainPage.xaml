@@ -4,71 +4,89 @@
              x:Class="MauiApp2.MainPage"
              Title="Inventory App">
 
-    <Grid ColumnSpacing="0" RowSpacing="0">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" /> <!-- Editor and buttons -->
-            <RowDefinition Height="*" />    <!-- Output box fills remaining space -->
-        </Grid.RowDefinitions>
+    <ContentPage.Content>
+        <Grid>
+            <Grid x:Name="LoginGrid" IsVisible="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Entry x:Name="UsernameEntry" Placeholder="Username" Grid.Row="0" Margin="20"/>
+                <Entry x:Name="PasswordEntry" Placeholder="Password" IsPassword="True" Grid.Row="1" Margin="20"/>
+                <Button Text="Login" Grid.Row="2" Margin="20" Clicked="OnLoginClicked"/>
+            </Grid>
+            <Grid x:Name="MainGrid" IsVisible="False">
+                <Grid ColumnSpacing="0" RowSpacing="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /> <!-- Editor and buttons -->
+                        <RowDefinition Height="*" />    <!-- Output box fills remaining space -->
+                    </Grid.RowDefinitions>
 
-        <!-- Editor at the center -->
-        <Entry
-                x:Name="ItemEditor"
-                Placeholder="Enter item details"
-                Grid.Column="0"
-                Grid.Row="0"
-                HorizontalOptions="FillAndExpand"
-                VerticalOptions="StartAndExpand" />
+                    <!-- Editor at the center -->
+                    <Entry
+                            x:Name="ItemEditor"
+                            Placeholder="Enter Data"
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            HorizontalOptions="Fill"
+                            VerticalOptions="Fill"
+                            FontSize="34"/>
+                    
 
-        <!-- Buttons stacked to the right -->
-        <StackLayout Orientation="Vertical" Grid.Column="1" Grid.Row="0" Spacing="8">
-            <Button Text="Add"
-                    Clicked="OnAddButtonClicked" />
-            <Button Text="Remove"
-                    Clicked="OnRemoveButtonClicked" />
-            <Button Text="Edit"
-                    Clicked="OnEditButtonClicked" />
-        </StackLayout>
+                    <!-- Buttons stacked to the right -->
+                    <StackLayout Orientation="Vertical" Grid.Column="1" Grid.Row="0" Spacing="8">
+                        <Button Text="Add"
+                                Clicked="OnAddButtonClicked" />
+                        <Button Text="Remove"
+                                Clicked="OnRemoveButtonClicked" />
+                        <Button Text="Edit"
+                                Clicked="OnEditButtonClicked" />
+                    </StackLayout>
 
-        <!-- Output screen -->
-        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+                    <!-- Output screen -->
+                    <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-            <Frame BackgroundColor="Blue" Padding="0" HasShadow="True" CornerRadius="0">
-                <CollectionView
-                    x:Name="ItemsCollectionView"
-                    ItemsSource="{Binding Items}"
-                    SelectionMode="Single"
-                    SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                    ItemsLayout="VerticalList"
-                    VerticalScrollBarVisibility="Always">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Padding="0">
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup Name="CommonStates">
-                                        <VisualState Name="Normal"/>
-                                        <VisualState Name="Selected">
-                                            <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="LightSkyBlue"/>
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-                                <Label Text="{Binding}" FontSize="18" Padding="10"/>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Frame>
+                        <Border BackgroundColor="Black" Padding="0">
+                            <CollectionView
+                                x:Name="ItemsCollectionView"
+                                ItemsSource="{Binding Items}"
+                                SelectionMode="Single"
+                                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                                ItemsLayout="VerticalList"
+                                VerticalScrollBarVisibility="Always">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="0">
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroup Name="CommonStates">
+                                                    <VisualState Name="Normal"/>
+                                                    <VisualState Name="Selected">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="BackgroundColor" Value="Grey"/>
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                </VisualStateGroup>
+                                            </VisualStateManager.VisualStateGroups>
+                                            <Label Text="{Binding}" FontSize="18" Padding="10"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Grid>
         </Grid>
-    </Grid>
+    </ContentPage.Content>
 </ContentPage>
