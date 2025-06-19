@@ -11,12 +11,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <!-- Fix: Add a row for output -->
         </Grid.RowDefinitions>
 
         <!-- Editor at the center -->
-        <Editor
-                Placeholder="Enter item name or description"
+        <Entry
+                x:Name="ItemEditor"
+                Placeholder="Enter item details"
                 Grid.Column="0"
                 Grid.Row="0"
                 HorizontalOptions="FillAndExpand"
@@ -25,12 +25,10 @@
         <!-- Buttons stacked to the right -->
         <StackLayout Orientation="Vertical" Grid.Column="1" Grid.Row="0">
             <Button Text="Add"
-                    Padding="1"
                     Clicked="OnAddButtonClicked" />
             <Button Text="Remove"
                     Clicked="OnRemoveButtonClicked" />
             <Button Text="Edit"
-                    Padding="1"
                     Clicked="OnEditButtonClicked" />
         </StackLayout>
 
