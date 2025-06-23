@@ -156,6 +156,13 @@ namespace MauiApp2
             // Logic to handle logout
             loginGrid.IsVisible = true;
             mainGrid.IsVisible = false;
+
+            //clear input on login fields
+            usernameEntry.Text = string.Empty;
+            passwordEntry.Text = string.Empty;
         }
+
+       
+
     }
 }

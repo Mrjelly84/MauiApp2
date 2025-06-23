@@ -43,9 +43,13 @@
                         <Button Text="Add"
                                 Clicked="OnAddButtonClicked" />
                         <Button Text="Remove"
+                               
                                 Clicked="OnRemoveButtonClicked" />
                         <Button Text="Edit"
                                 Clicked="OnEditButtonClicked" />
+                        <StackLayout Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalOptions="End" Margin="10,0,10,0">
+                            <Button Text="Logout" Clicked="OnLogoutClicked" />
+                        </StackLayout>
                     </StackLayout>
 
                     <!-- Output screen -->
