@@ -3,6 +3,10 @@ using System.ComponentModel;
 using System.Data;
 using Microsoft.Data.Sqlite; // Add this NuGet package if not present
 using System.Collections.ObjectModel;
+using System;
+using System.IO;
+using System.Diagnostics;
+using Microsoft.Maui.Storage;
 
 namespace MauiApp2
 {
@@ -45,6 +49,8 @@ namespace MauiApp2
         private Grid mainGrid;  // Rename the field to avoid ambiguity
         private Grid loginGrid; // Rename the field to avoid ambiguity
 
+        private string logFilePath;
+
         public MainPage()
         {
             SQLitePCL.Batteries.Init();
@@ -58,6 +64,15 @@ namespace MauiApp2
             // Initialize MainGrid and LoginGrid
             mainGrid = this.FindByName<Grid>("MainGrid"); // Use the renamed field
             loginGrid = this.FindByName<Grid>("LoginGrid"); // Use the renamed field
+
+            logFilePath = Path.Combine(FileSystem.AppDataDirectory, "useractions.log");
+
+            // Add tap gesture for log file link
+            var logFileTap = new TapGestureRecognizer();
+            logFileTap.Tapped += OnLogFileTapped;
+            var logLabel = this.FindByName<Label>("LogFileLabel");
+            if (logLabel != null)
+                logLabel.GestureRecognizers.Add(logFileTap);
 
             InitializeDatabase();
             LoadItems();
@@ -87,6 +102,12 @@ namespace MauiApp2
             }
         }
 
+        private void LogAction(string action)
+        {
+            var logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {action}{Environment.NewLine}";
+            File.AppendAllText(logFilePath, logEntry);
+        }
+
         private void OnAddButtonClicked(object sender, EventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(ItemEditor.Text))
@@ -99,6 +120,8 @@ namespace MauiApp2
                 command.ExecuteNonQuery();
                 LoadItems();
                 ItemEditor.Text = string.Empty;
+
+                LogAction($"User added item: '{ItemEditor.Text}'");
             }
         }
 
@@ -114,6 +137,8 @@ namespace MauiApp2
                 command.ExecuteNonQuery();
                 LoadItems();
                 SelectedItem = null;
+
+                LogAction($"User removed item: '{SelectedItem}'");
             }
         }
 
@@ -131,6 +156,8 @@ namespace MauiApp2
                 LoadItems();
                 SelectedItem = null;
                 ItemEditor.Text = string.Empty;
+
+                LogAction($"User edited item: '{ItemEditor.Text}'");
             }
         }
 
@@ -144,6 +171,8 @@ namespace MauiApp2
             {
                 loginGrid.IsVisible = false;
                 mainGrid.IsVisible = true;
+
+                LogAction($"User '{usernameEntry.Text}' logged in.");
             }
             else
             {
@@ -162,7 +191,20 @@ namespace MauiApp2
             passwordEntry.Text = string.Empty;
         }
 
-       
-
+        private async void OnLogFileTapped(object sender, EventArgs e)
+        {
+            // Use the same log file path as used in LogAction
+            if (File.Exists(logFilePath))
+            {
+                await Launcher.Default.OpenAsync(new OpenFileRequest
+                {
+                    File = new ReadOnlyFile(logFilePath)
+                });
+            }
+            else
+            {
+                await DisplayAlert("Log File", "Log file not found.", "OK");
+            }
+        }
     }
 }
