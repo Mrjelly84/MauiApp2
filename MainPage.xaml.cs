@@ -1,7 +1,7 @@
 ﻿using Microsoft.Maui.Controls;
 using System.ComponentModel;
 using System.Data;
-using Microsoft.Data.Sqlite; // Add this NuGet package if not present
+using Microsoft.Data.Sqlite; 
 using System.Collections.ObjectModel;
 using System;
 using System.IO;
@@ -46,8 +46,8 @@ namespace MauiApp2
 
         private Entry usernameEntry;
         private Entry passwordEntry;
-        private Grid mainGrid;  // Rename the field to avoid ambiguity
-        private Grid loginGrid; // Rename the field to avoid ambiguity
+        private Grid mainGrid;  
+        private Grid loginGrid; 
 
         private string logFilePath;
 
@@ -62,8 +62,8 @@ namespace MauiApp2
             passwordEntry = this.FindByName<Entry>("PasswordEntry");
 
             // Initialize MainGrid and LoginGrid
-            mainGrid = this.FindByName<Grid>("MainGrid"); // Use the renamed field
-            loginGrid = this.FindByName<Grid>("LoginGrid"); // Use the renamed field
+            mainGrid = this.FindByName<Grid>("MainGrid"); 
+            loginGrid = this.FindByName<Grid>("LoginGrid"); 
 
             logFilePath = Path.Combine(FileSystem.AppDataDirectory, "useractions.log");
 
