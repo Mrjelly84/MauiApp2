@@ -1,55 +1,25 @@
 ﻿using Microsoft.Maui.Controls;
-using System.ComponentModel;
-using System.Data;
-using Microsoft.Data.Sqlite; 
 using System.Collections.ObjectModel;
 using System;
 using System.IO;
-using System.Diagnostics;
 using Microsoft.Maui.Storage;
+using MauiApp2.Models;
+using MauiApp2.Services;
 
 namespace MauiApp2
 {
-    public partial class MainPage : ContentPage, INotifyPropertyChanged
+    public partial class MainPage : ContentPage
     {
-        private string selectedItemDetail;
-        public string SelectedItemDetail
-        {
-            get => selectedItemDetail;
-            set
-            {
-                if (selectedItemDetail != value)
-                {
-                    selectedItemDetail = value;
-                    OnPropertyChanged(nameof(SelectedItemDetail));
-                }
-            }
-        }
+        private readonly ItemRepository itemRepository;
+        private readonly LogService logService;
 
         public ObservableCollection<string> Items { get; set; } = new();
-        private string selectedItem;
-        public string SelectedItem
-        {
-            get => selectedItem;
-            set
-            {
-                if (selectedItem != value)
-                {
-                    selectedItem = value;
-                    OnPropertyChanged(nameof(SelectedItem));
-                }
-            }
-        }
-
-        private const string DbPath = "items.db";
-        private const string TableName = "Items";
+        public string SelectedItem { get; set; }
 
         private Entry usernameEntry;
         private Entry passwordEntry;
-        private Grid mainGrid;  
-        private Grid loginGrid; 
-
-        private string logFilePath;
+        private Grid mainGrid;
+        private Grid loginGrid;
 
         public MainPage()
         {
@@ -57,71 +27,29 @@ namespace MauiApp2
             InitializeComponent();
             BindingContext = this;
 
-            // Initialize usernameEntry and passwordEntry
             usernameEntry = this.FindByName<Entry>("UsernameEntry");
             passwordEntry = this.FindByName<Entry>("PasswordEntry");
+            mainGrid = this.FindByName<Grid>("MainGrid");
+            loginGrid = this.FindByName<Grid>("LoginGrid");
 
-            // Initialize MainGrid and LoginGrid
-            mainGrid = this.FindByName<Grid>("MainGrid"); 
-            loginGrid = this.FindByName<Grid>("LoginGrid"); 
+            var dbPath = "items.db";
+            var tableName = "Items";
+            var logFilePath = Path.Combine(FileSystem.AppDataDirectory, "useractions.log");
 
-            logFilePath = Path.Combine(FileSystem.AppDataDirectory, "useractions.log");
+            itemRepository = new ItemRepository(dbPath, tableName);
+            logService = new LogService(logFilePath);
 
-            // Add tap gesture for log file link
-            var logFileTap = new TapGestureRecognizer();
-            logFileTap.Tapped += OnLogFileTapped;
-            var logLabel = this.FindByName<Label>("LogFileLabel");
-            if (logLabel != null)
-                logLabel.GestureRecognizers.Add(logFileTap);
-
-            InitializeDatabase();
-            LoadItems();
-        }
-
-        private void InitializeDatabase()
-        {
-            using var connection = new SqliteConnection($"Data Source={DbPath}");
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                $"CREATE TABLE IF NOT EXISTS {TableName} (Id INTEGER PRIMARY KEY AUTOINCREMENT, Detail TEXT NOT NULL);";
-            command.ExecuteNonQuery();
-        }
-
-        private void LoadItems()
-        {
-            Items.Clear();
-            using var connection = new SqliteConnection($"Data Source={DbPath}");
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText = $"SELECT Detail FROM {TableName};";
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                Items.Add(reader.GetString(0));
-            }
-        }
-
-        private void LogAction(string action)
-        {
-            var logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {action}{Environment.NewLine}";
-            File.AppendAllText(logFilePath, logEntry);
+            Items = itemRepository.LoadItems();
         }
 
         private void OnAddButtonClicked(object sender, EventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(ItemEditor.Text))
             {
-                using var connection = new SqliteConnection($"Data Source={DbPath}");
-                connection.Open();
-                var command = connection.CreateCommand();
-                command.CommandText = $"INSERT INTO {TableName} (Detail) VALUES (@detail);";
-                command.Parameters.AddWithValue("@detail", ItemEditor.Text);
-                command.ExecuteNonQuery();
-                LoadItems();
+                itemRepository.AddItem(ItemEditor.Text);
+                Items = itemRepository.LoadItems();
                 ItemEditor.Text = string.Empty;
-
-                LogAction($"User added item: '{ItemEditor.Text}'");
+                logService.LogAction($"User added item: '{ItemEditor.Text}'");
             }
         }
 
@@ -129,16 +57,10 @@ namespace MauiApp2
         {
             if (!string.IsNullOrEmpty(SelectedItem))
             {
-                using var connection = new SqliteConnection($"Data Source={DbPath}");
-                connection.Open();
-                var command = connection.CreateCommand();
-                command.CommandText = $"DELETE FROM {TableName} WHERE Detail = @detail;";
-                command.Parameters.AddWithValue("@detail", SelectedItem);
-                command.ExecuteNonQuery();
-                LoadItems();
+                itemRepository.RemoveItem(SelectedItem);
+                Items = itemRepository.LoadItems();
                 SelectedItem = null;
-
-                LogAction($"User removed item: '{SelectedItem}'");
+                logService.LogAction($"User removed item: '{SelectedItem}'");
             }
         }
 
@@ -146,24 +68,16 @@ namespace MauiApp2
         {
             if (!string.IsNullOrEmpty(SelectedItem) && !string.IsNullOrWhiteSpace(ItemEditor.Text))
             {
-                using var connection = new SqliteConnection($"Data Source={DbPath}");
-                connection.Open();
-                var command = connection.CreateCommand();
-                command.CommandText = $"UPDATE {TableName} SET Detail = @newDetail WHERE Detail = @oldDetail;";
-                command.Parameters.AddWithValue("@newDetail", ItemEditor.Text);
-                command.Parameters.AddWithValue("@oldDetail", SelectedItem);
-                command.ExecuteNonQuery();
-                LoadItems();
+                itemRepository.EditItem(SelectedItem, ItemEditor.Text);
+                Items = itemRepository.LoadItems();
                 SelectedItem = null;
                 ItemEditor.Text = string.Empty;
-
-                LogAction($"User edited item: '{ItemEditor.Text}'");
+                logService.LogAction($"User edited item: '{ItemEditor.Text}'");
             }
         }
 
         private void OnLoginClicked(object sender, EventArgs e)
         {
-            // Example: Hardcoded credentials
             const string validUsername = "admin";
             const string validPassword = "password123";
 
@@ -171,8 +85,7 @@ namespace MauiApp2
             {
                 loginGrid.IsVisible = false;
                 mainGrid.IsVisible = true;
-
-                LogAction($"User '{usernameEntry.Text}' logged in.");
+                logService.LogAction($"User '{usernameEntry.Text}' logged in.");
             }
             else
             {
@@ -182,23 +95,19 @@ namespace MauiApp2
 
         private void OnLogoutClicked(object sender, EventArgs e)
         {
-            // Logic to handle logout
             loginGrid.IsVisible = true;
             mainGrid.IsVisible = false;
-
-            //clear input on login fields
             usernameEntry.Text = string.Empty;
             passwordEntry.Text = string.Empty;
         }
 
         private async void OnLogFileTapped(object sender, EventArgs e)
         {
-            // Use the same log file path as used in LogAction
-            if (File.Exists(logFilePath))
+            if (File.Exists(logService.LogFilePath))
             {
                 await Launcher.Default.OpenAsync(new OpenFileRequest
                 {
-                    File = new ReadOnlyFile(logFilePath)
+                    File = new ReadOnlyFile(logService.LogFilePath)
                 });
             }
             else
