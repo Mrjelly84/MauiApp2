@@ -85,17 +85,7 @@
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="0">
-                                            <VisualStateManager.VisualStateGroups>
-                                                <VisualStateGroup Name="CommonStates">
-                                                    <VisualState Name="Normal"/>
-                                                    <VisualState Name="Selected">
-                                                        <VisualState.Setters>
-                                                            <Setter Property="BackgroundColor" Value="Grey"/>
-                                                        </VisualState.Setters>
-                                                    </VisualState>
-                                                </VisualStateGroup>
-                                            </VisualStateManager.VisualStateGroups>
-                                            <Label Text="{Binding}" FontSize="18" Padding="10"/>
+                                            <Label Text="{Binding .}" FontSize="18" Padding="10"/>
                                         </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>

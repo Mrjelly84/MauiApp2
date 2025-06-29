@@ -13,7 +13,7 @@ namespace MauiApp2
         private readonly ItemRepository itemRepository;
         private readonly LogService logService;
 
-        public ObservableCollection<string> Items { get; set; } = new();
+        public ObservableCollection<string> Items { get; } = new();
         public string SelectedItem { get; set; }
 
         private Entry usernameEntry;
@@ -39,7 +39,8 @@ namespace MauiApp2
             itemRepository = new ItemRepository(dbPath, tableName);
             logService = new LogService(logFilePath);
 
-            Items = itemRepository.LoadItems();
+            foreach (var item in itemRepository.LoadItems())
+                Items.Add(item);
         }
 
         private void OnAddButtonClicked(object sender, EventArgs e)
@@ -47,9 +48,11 @@ namespace MauiApp2
             if (!string.IsNullOrWhiteSpace(ItemEditor.Text))
             {
                 itemRepository.AddItem(ItemEditor.Text);
-                Items = itemRepository.LoadItems();
-                ItemEditor.Text = string.Empty;
+                Items.Clear();
+                foreach (var item in itemRepository.LoadItems())
+                    Items.Add(item);
                 logService.LogAction($"User added item: '{ItemEditor.Text}'");
+                ItemEditor.Text = string.Empty;
             }
         }
 
@@ -58,7 +61,9 @@ namespace MauiApp2
             if (!string.IsNullOrEmpty(SelectedItem))
             {
                 itemRepository.RemoveItem(SelectedItem);
-                Items = itemRepository.LoadItems();
+                Items.Clear();
+                foreach (var item in itemRepository.LoadItems())
+                    Items.Add(item);
                 SelectedItem = null;
                 logService.LogAction($"User removed item: '{SelectedItem}'");
             }
@@ -69,7 +74,9 @@ namespace MauiApp2
             if (!string.IsNullOrEmpty(SelectedItem) && !string.IsNullOrWhiteSpace(ItemEditor.Text))
             {
                 itemRepository.EditItem(SelectedItem, ItemEditor.Text);
-                Items = itemRepository.LoadItems();
+                Items.Clear();
+                foreach (var item in itemRepository.LoadItems())
+                    Items.Add(item);
                 SelectedItem = null;
                 ItemEditor.Text = string.Empty;
                 logService.LogAction($"User edited item: '{ItemEditor.Text}'");

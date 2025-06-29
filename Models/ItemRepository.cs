@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using Microsoft.Maui.Storage;
 using System.Collections.ObjectModel;
 
 namespace MauiApp2.Models
@@ -10,6 +11,10 @@ namespace MauiApp2.Models
 
         public ItemRepository(string dbPath, string tableName)
         {
+            // Ensure dbPath is a full path in the app's data directory
+            if (!Path.IsPathRooted(dbPath))
+                dbPath = Path.Combine(FileSystem.AppDataDirectory, dbPath);
+
             this.dbPath = dbPath;
             this.tableName = tableName;
             InitializeDatabase();
