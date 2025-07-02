@@ -12,9 +12,23 @@ namespace MauiApp2
     {
         private readonly ItemRepository itemRepository;
         private readonly LogService logService;
+        private static readonly string DbPath = Path.Combine(FileSystem.AppDataDirectory, "items.db");
 
         public ObservableCollection<string> Items { get; } = new();
-        public string SelectedItem { get; set; }
+        
+        private string selectedItem;
+        public string SelectedItem
+        {
+            get => selectedItem;
+            set
+            {
+                if (selectedItem != value)
+                {
+                    selectedItem = value;
+                    OnPropertyChanged(nameof(SelectedItem));
+                }
+            }
+        }
 
         private Entry usernameEntry;
         private Entry passwordEntry;
@@ -32,11 +46,10 @@ namespace MauiApp2
             mainGrid = this.FindByName<Grid>("MainGrid");
             loginGrid = this.FindByName<Grid>("LoginGrid");
 
-            var dbPath = "items.db";
             var tableName = "Items";
             var logFilePath = Path.Combine(FileSystem.AppDataDirectory, "useractions.log");
 
-            itemRepository = new ItemRepository(Path.Combine(FileSystem.AppDataDirectory, dbPath), tableName);
+            itemRepository = new ItemRepository(DbPath, tableName);
             logService = new LogService(logFilePath);
 
             foreach (var item in itemRepository.LoadItems())
@@ -45,15 +58,21 @@ namespace MauiApp2
 
         private void OnAddButtonClicked(object sender, EventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(ItemEditor.Text))
+            try
             {
-                var dbPath = "items.db";
-                itemRepository.AddItem(ItemEditor.Text);
-                Items.Clear();
-                foreach (var item in itemRepository.LoadItems())
-                    Items.Add(item);
-                logService.LogAction($"User added item: '{ItemEditor.Text}'");
-                ItemEditor.Text = string.Empty;
+                if (!string.IsNullOrWhiteSpace(ItemEditor.Text))
+                {
+                    itemRepository.AddItem(ItemEditor.Text);
+                    Items.Clear();
+                    foreach (var item in itemRepository.LoadItems())
+                        Items.Add(item);
+                    logService.LogAction($"User added item: '{ItemEditor.Text}'");
+                    ItemEditor.Text = string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayAlert("Error", $"Add failed: {ex.Message}", "OK");
             }
         }
 
@@ -61,7 +80,6 @@ namespace MauiApp2
         {
             if (!string.IsNullOrEmpty(SelectedItem))
             {
-                var dbPath = "items.db";
                 itemRepository.RemoveItem(SelectedItem);
                 Items.Clear();
                 foreach (var item in itemRepository.LoadItems())
@@ -75,7 +93,6 @@ namespace MauiApp2
         {
             if (!string.IsNullOrEmpty(SelectedItem) && !string.IsNullOrWhiteSpace(ItemEditor.Text))
             {
-                var dbPath = "items.db";
                 itemRepository.EditItem(SelectedItem, ItemEditor.Text);
                 Items.Clear();
                 foreach (var item in itemRepository.LoadItems())
