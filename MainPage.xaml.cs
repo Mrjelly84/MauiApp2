@@ -36,7 +36,7 @@ namespace MauiApp2
             var tableName = "Items";
             var logFilePath = Path.Combine(FileSystem.AppDataDirectory, "useractions.log");
 
-            itemRepository = new ItemRepository(dbPath, tableName);
+            itemRepository = new ItemRepository(Path.Combine(FileSystem.AppDataDirectory, dbPath), tableName);
             logService = new LogService(logFilePath);
 
             foreach (var item in itemRepository.LoadItems())
@@ -47,6 +47,7 @@ namespace MauiApp2
         {
             if (!string.IsNullOrWhiteSpace(ItemEditor.Text))
             {
+                var dbPath = "items.db";
                 itemRepository.AddItem(ItemEditor.Text);
                 Items.Clear();
                 foreach (var item in itemRepository.LoadItems())
@@ -60,6 +61,7 @@ namespace MauiApp2
         {
             if (!string.IsNullOrEmpty(SelectedItem))
             {
+                var dbPath = "items.db";
                 itemRepository.RemoveItem(SelectedItem);
                 Items.Clear();
                 foreach (var item in itemRepository.LoadItems())
@@ -73,6 +75,7 @@ namespace MauiApp2
         {
             if (!string.IsNullOrEmpty(SelectedItem) && !string.IsNullOrWhiteSpace(ItemEditor.Text))
             {
+                var dbPath = "items.db";
                 itemRepository.EditItem(SelectedItem, ItemEditor.Text);
                 Items.Clear();
                 foreach (var item in itemRepository.LoadItems())
