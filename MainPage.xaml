@@ -85,7 +85,7 @@
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="0">
-                                            <Label Text="{Binding .}" FontSize="18" Padding="10"/>
+                                            <Label Text="{Binding .}" FontSize="18" Padding="10" TextColor="Purple"/>
                                         </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
