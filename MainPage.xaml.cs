@@ -46,7 +46,7 @@ namespace MauiApp2
             mainGrid = this.FindByName<Grid>("MainGrid");
             loginGrid = this.FindByName<Grid>("LoginGrid");
 
-            var tableName = "Items";
+            var tableName = "Items";                    
             var logFilePath = Path.Combine(FileSystem.AppDataDirectory, "useractions.log");
 
             itemRepository = new ItemRepository(DbPath, tableName);
@@ -78,28 +78,42 @@ namespace MauiApp2
 
         private void OnRemoveButtonClicked(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(SelectedItem))
+            try
             {
-                itemRepository.RemoveItem(SelectedItem);
-                Items.Clear();
-                foreach (var item in itemRepository.LoadItems())
-                    Items.Add(item);
-                SelectedItem = null;
-                logService.LogAction($"User removed item: '{SelectedItem}'");
+                if (!string.IsNullOrEmpty(SelectedItem))
+                {
+                    itemRepository.RemoveItem(SelectedItem);
+                    Items.Clear();
+                    foreach (var item in itemRepository.LoadItems())
+                        Items.Add(item);
+                    logService.LogAction($"User removed item: '{SelectedItem}'");
+                    SelectedItem = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayAlert("Error", $"Remove failed: {ex.Message}", "OK");
             }
         }
 
         private void OnEditButtonClicked(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(SelectedItem) && !string.IsNullOrWhiteSpace(ItemEditor.Text))
+            try
             {
-                itemRepository.EditItem(SelectedItem, ItemEditor.Text);
-                Items.Clear();
-                foreach (var item in itemRepository.LoadItems())
-                    Items.Add(item);
-                SelectedItem = null;
-                ItemEditor.Text = string.Empty;
-                logService.LogAction($"User edited item: '{ItemEditor.Text}'");
+                if (!string.IsNullOrEmpty(SelectedItem) && !string.IsNullOrWhiteSpace(ItemEditor.Text))
+                {
+                    itemRepository.EditItem(SelectedItem, ItemEditor.Text);
+                    Items.Clear();
+                    foreach (var item in itemRepository.LoadItems())
+                        Items.Add(item);
+                    logService.LogAction($"User edited item: '{ItemEditor.Text}'");
+                    SelectedItem = null;
+                    ItemEditor.Text = string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayAlert("Error", $"Edit failed: {ex.Message}", "OK");
             }
         }
 
